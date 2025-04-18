@@ -1,3 +1,7 @@
+package busmanager;
+
+import busmanager.solution.DepotSolution;
+
 import java.util.List;
 import java.util.Set;
 

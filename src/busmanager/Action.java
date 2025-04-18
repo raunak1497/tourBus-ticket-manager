@@ -1,3 +1,5 @@
+package busmanager;
+
 import java.util.Objects;
 
 public final class Action<T> {
