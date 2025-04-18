@@ -23,11 +23,11 @@ public class DepotSolution extends Depot<BusSolution, TicketSolution> {
 
     @Override
     public TicketSolution issueTicket(int id) {
-        return new TicketSolution();
+        return new TicketSolution(this);
     }
 
     @Override
-    public boolean boardBus(BusSolution bus, Set<TicketSolution> tickets) {
+    public synchronized boolean boardBus(BusSolution bus, Set<TicketSolution> tickets) {
         if(tickets.size() + bus.contents.size() > bus.capacity)
             return false;
 
@@ -47,7 +47,7 @@ public class DepotSolution extends Depot<BusSolution, TicketSolution> {
     }
 
     @Override
-    public boolean transferTickets(BusSolution from, BusSolution to, Set<TicketSolution> tickets) {
+    public synchronized boolean transferTickets(BusSolution from, BusSolution to, Set<TicketSolution> tickets) {
        if(!from.contents.containsAll(tickets))
            return false;
 
@@ -70,7 +70,7 @@ public class DepotSolution extends Depot<BusSolution, TicketSolution> {
     }
 
     @Override
-    public boolean useTickets(BusSolution bus, Set<TicketSolution> tickets) {
+    public synchronized boolean useTickets(BusSolution bus, Set<TicketSolution> tickets) {
         if(!bus.contents.containsAll(tickets))
             return false;
 
@@ -85,7 +85,7 @@ public class DepotSolution extends Depot<BusSolution, TicketSolution> {
     }
 
     @Override
-    public boolean expireTickets(BusSolution bus, Set<TicketSolution> tickets) {
+    public synchronized boolean expireTickets(BusSolution bus, Set<TicketSolution> tickets) {
         if(!bus.contents.containsAll(tickets))
             return false;
 
@@ -100,7 +100,7 @@ public class DepotSolution extends Depot<BusSolution, TicketSolution> {
     }
 
     @Override
-    public Set<TicketSolution> getTickets() {
+    public synchronized Set<TicketSolution> getTickets() {
         Set<TicketSolution> ret =  new HashSet<>();
 
         for(BusSolution bus : buses){
@@ -110,7 +110,7 @@ public class DepotSolution extends Depot<BusSolution, TicketSolution> {
     }
 
     @Override
-    public Set<TicketSolution> getTickets(BusSolution bus) {
+    public synchronized Set<TicketSolution> getTickets(BusSolution bus) {
         return new HashSet<>(bus.contents);
     }
 
