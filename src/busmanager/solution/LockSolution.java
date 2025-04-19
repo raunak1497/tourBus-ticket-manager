@@ -2,34 +2,58 @@ package busmanager.solution;
 
 import busmanager.Lock;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 public class LockSolution extends Lock {
 
-    private boolean lock = false;
+    private AtomicBoolean lock = new AtomicBoolean(false);
+    private volatile Thread owner = null;
+    private int count = 0;
+
     @Override
     public void lock() {
-        while(lock == true);
+        if(lock.get() && owner == Thread.currentThread()){
+            count+=1;
+            return;
+        }
+        while(lock.compareAndExchange(false, true) != false);
 
-        lock = true;
+        count = 1;
+
+        owner = Thread.currentThread();
     }
 
     @Override
     public boolean tryLock() {
-        if(lock == true)
+        if(lock.get() && owner == Thread.currentThread()){
+            count+=1;
+            return true;
+        }
+        if(lock.compareAndExchange(false, true) != false)
             return false;
 
-        lock = true;
+        owner = Thread.currentThread();
         return true;
     }
 
     @Override
     public void unlock() {
-        if(lock == false )
+        if(!lock.get())
             throw  new IllegalMonitorStateException();
-        lock = false;
+
+        if(owner != Thread.currentThread())
+            throw new IllegalMonitorStateException();
+
+        count -= 1;
+
+        if(count == 0){
+            owner = null;
+            lock.set(false);
+        }
     }
 
     @Override
     public boolean isReentered() {
-        throw new Error("Not implemented yet");
+        return count > 0;
     }
 }
