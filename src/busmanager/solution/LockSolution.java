@@ -5,21 +5,21 @@ import busmanager.Lock;
 public class LockSolution extends Lock {
     @Override
     public void lock() {
-
+        throw new Error("Not implemented yet");
     }
 
     @Override
     public boolean tryLock() {
-        return false;
+        throw new Error("Not implemented yet");
     }
 
     @Override
     public void unlock() {
-
+        throw new Error("Not implemented yet");
     }
 
     @Override
     public boolean isReentered() {
-        return false;
+        throw new Error("Not implemented yet");
     }
 }
