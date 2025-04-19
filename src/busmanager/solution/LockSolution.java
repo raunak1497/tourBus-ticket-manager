@@ -3,19 +3,29 @@ package busmanager.solution;
 import busmanager.Lock;
 
 public class LockSolution extends Lock {
+
+    private boolean lock = false;
     @Override
     public void lock() {
-        throw new Error("Not implemented yet");
+        while(lock == true);
+
+        lock = true;
     }
 
     @Override
     public boolean tryLock() {
-        throw new Error("Not implemented yet");
+        if(lock == true)
+            return false;
+
+        lock = true;
+        return true;
     }
 
     @Override
     public void unlock() {
-        throw new Error("Not implemented yet");
+        if(lock == false )
+            throw  new IllegalMonitorStateException();
+        lock = false;
     }
 
     @Override
