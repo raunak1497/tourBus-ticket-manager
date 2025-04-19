@@ -9,6 +9,11 @@ public class LockSolution extends Lock {
     private AtomicBoolean lock = new AtomicBoolean(false);
     private volatile Thread owner = null; //volatile to ensure no data-race
     private volatile int count = 0; //volatile to ensure no data-race
+    private static  void highPrecisionSleep(long millis){
+        long currentTime = System.currentTimeMillis();
+
+        while(System.currentTimeMillis() - currentTime < millis);
+    }
 
     @Override
     public void lock() {
@@ -16,7 +21,18 @@ public class LockSolution extends Lock {
             count+=1;
             return;
         }
-        while(lock.compareAndExchange(false, true) != false);
+        long backoff = 10;
+
+        while(true){
+            while(lock.get());
+
+            if(lock.compareAndExchange(false, true) == false)
+                break;
+
+            highPrecisionSleep(backoff);
+            backoff *= 1.5;
+        }
+
 
         count = 1;
 
