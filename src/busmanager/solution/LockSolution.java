@@ -7,8 +7,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class LockSolution extends Lock {
 
     private AtomicBoolean lock = new AtomicBoolean(false);
-    private volatile Thread owner = null;
-    private int count = 0;
+    private volatile Thread owner = null; //volatile to ensure no data-race
+    private volatile int count = 0; //volatile to ensure no data-race
 
     @Override
     public void lock() {
@@ -54,6 +54,6 @@ public class LockSolution extends Lock {
 
     @Override
     public boolean isReentered() {
-        return count > 0;
+        return count > 1; //only need to re-enter when we have accquired lock more than once
     }
 }
