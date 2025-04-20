@@ -24,7 +24,7 @@ public class DepotSolution extends Depot<BusSolution, TicketSolution> {
 
     @Override
     public boolean boardBus(BusSolution bus, Set<TicketSolution> tickets) {
-        bus.busLock.lock();
+        bus.busLock.writeLock().lock();
         try{
             if(tickets.size() + bus.contents.size() > bus.capacity)
                 return false;
@@ -41,7 +41,7 @@ public class DepotSolution extends Depot<BusSolution, TicketSolution> {
             }
             return true;
         }finally{
-            bus.busLock.unlock();
+            bus.busLock.writeLock().unlock();
         }
 
     }
@@ -60,8 +60,8 @@ public class DepotSolution extends Depot<BusSolution, TicketSolution> {
             return true;
         }
 
-        first.busLock.lock();
-        second.busLock.lock();
+        first.busLock.writeLock().lock();
+        second.busLock.writeLock().lock();
         try{
             if(!from.contents.containsAll(tickets))
                 return false;
@@ -74,15 +74,15 @@ public class DepotSolution extends Depot<BusSolution, TicketSolution> {
 
             return true;
         }finally {
-            from.busLock.unlock();
-            to.busLock.unlock();
+            from.busLock.writeLock().unlock();
+            to.busLock.writeLock().unlock();
         }
 
     }
 
     @Override
     public boolean useTickets(BusSolution bus, Set<TicketSolution> tickets) {
-        bus.busLock.lock();
+        bus.busLock.writeLock().lock();
         try{
             if(!bus.contents.containsAll(tickets))
                 return false;
@@ -94,14 +94,14 @@ public class DepotSolution extends Depot<BusSolution, TicketSolution> {
 
             return true;
         }finally {
-            bus.busLock.unlock();
+            bus.busLock.writeLock().unlock();
         }
 
     }
 
     @Override
     public boolean expireTickets(BusSolution bus, Set<TicketSolution> tickets) {
-        bus.busLock.lock();
+        bus.busLock.writeLock().lock();
         try{
             if(!bus.contents.containsAll(tickets))
                 return false;
@@ -113,7 +113,7 @@ public class DepotSolution extends Depot<BusSolution, TicketSolution> {
 
             return true;
         }finally {
-            bus.busLock.unlock();
+            bus.busLock.writeLock().unlock();
         }
 
     }
@@ -125,11 +125,11 @@ public class DepotSolution extends Depot<BusSolution, TicketSolution> {
 
     @Override
     public Set<TicketSolution> getTickets(BusSolution bus) {
-        bus.busLock.lock();
+        bus.busLock.readLock().lock();
         try{
             return new HashSet<>(bus.contents);
         }finally{
-            bus.busLock.unlock();
+            bus.busLock.readLock().unlock();
         }
 
     }
@@ -152,7 +152,7 @@ public class DepotSolution extends Depot<BusSolution, TicketSolution> {
 
         //lock all buses
         for(BusSolution bus : sorted)
-            bus.busLock.lock();
+            bus.busLock.readLock().lock();
 
         try{
                 //get all tickets
@@ -161,7 +161,7 @@ public class DepotSolution extends Depot<BusSolution, TicketSolution> {
         }finally {
             //unlock all buses
             for(BusSolution bus : buses)
-                bus.busLock.unlock();
+                bus.busLock.readLock().unlock();
        }
 
         return ret;
