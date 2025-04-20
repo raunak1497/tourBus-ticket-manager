@@ -1,14 +1,19 @@
 package busmanager.solution;
 
+
 import busmanager.Ticket;
+
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class TicketSolution implements Ticket {
 
     Status status = Status.ISSUED;
-    DepotSolution depot;
+    final int id;
+    final Lock ticketLock = new ReentrantLock();
 
-    public TicketSolution(DepotSolution depot) {
-        this.depot = depot;
+    public TicketSolution(int id) {
+        this.id = id;
     }
 
     @Override

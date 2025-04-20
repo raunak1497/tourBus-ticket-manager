@@ -19,13 +19,27 @@ public class DepotSolution extends Depot<BusSolution, TicketSolution> {
 
     @Override
     public TicketSolution issueTicket(int id) {
-        return new TicketSolution(this);
+        return new TicketSolution(id);
     }
 
     @Override
     public boolean boardBus(BusSolution bus, Set<TicketSolution> tickets) {
+        LinkedList<TicketSolution> sortedTickets = new LinkedList<>(tickets);
+        Collections.sort(sortedTickets, (TicketSolution t1,TicketSolution t2) -> {
+            if(t1.id < t2.id)
+                return -1;
+            else if(t1.id > t2.id)
+                return 1;
+            else{
+                return 0;
+            }
+        });
+
         bus.busLock.writeLock().lock();
         try{
+            for(TicketSolution ticket : sortedTickets){
+                ticket.ticketLock.lock();
+            }
             if(tickets.size() + bus.contents.size() > bus.capacity)
                 return false;
 
@@ -42,6 +56,9 @@ public class DepotSolution extends Depot<BusSolution, TicketSolution> {
             return true;
         }finally{
             bus.busLock.writeLock().unlock();
+            for(TicketSolution ticket : tickets){
+                ticket.ticketLock.unlock();
+            }
         }
 
     }
