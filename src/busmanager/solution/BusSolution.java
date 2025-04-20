@@ -10,7 +10,10 @@ public class BusSolution implements Bus{
     int capacity;
     Set<TicketSolution> contents = new HashSet<>();
     Lock busLock = new ReentrantLock();
-    public BusSolution(int capacity) {
+    final int id;
+    public BusSolution(int capacity,int id) {
+
         this.capacity = capacity;
+        this.id = id;
     }
 }

@@ -3,17 +3,16 @@ package busmanager.solution;
 import busmanager.Depot;
 import busmanager.Ticket;
 
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class DepotSolution extends Depot<BusSolution, TicketSolution> {
     private List<BusSolution> buses = new LinkedList<>();
+    private AtomicInteger counter = new AtomicInteger(0);
 
     @Override
     public BusSolution createBus(int capacity) {
-        BusSolution ret =  new BusSolution(capacity);
+        BusSolution ret =  new BusSolution(capacity,counter.incrementAndGet());
         buses.add(ret);
         return ret;
     }
@@ -49,8 +48,20 @@ public class DepotSolution extends Depot<BusSolution, TicketSolution> {
 
     @Override
     public boolean transferTickets(BusSolution from, BusSolution to, Set<TicketSolution> tickets) {
-        from.busLock.lock();
-        to.busLock.lock();
+        BusSolution first,second;
+
+        if(from.id < to.id){
+            first = from;
+            second = to;
+        }else if(from.id > to.id){
+            first = to;
+            second = from;
+        }else{
+            return true;
+        }
+
+        first.busLock.lock();
+        second.busLock.lock();
         try{
             if(!from.contents.containsAll(tickets))
                 return false;
@@ -127,15 +138,32 @@ public class DepotSolution extends Depot<BusSolution, TicketSolution> {
     public Set<TicketSolution> getTickets(List<BusSolution> buses) {
         Set<TicketSolution> ret =  new HashSet<>();
 
-        for(BusSolution bus : buses){
-            bus.busLock.lock();
-            try{
-                ret.addAll(bus.contents); //INCORRECT !!!
-            }finally {
-                bus.busLock.unlock();
+        //to avoid deadlock we must sort at to have some order
+        LinkedList<BusSolution> sorted = new LinkedList<>(buses);
+        Collections.sort(sorted,(BusSolution bus1, BusSolution bus2) -> {
+            if(bus1.id < bus2.id){
+                return -1;
+            }else if(bus1.id > bus2.id){
+               return 1;
+            }else{
+                return 0;
             }
+        });
 
-        }
+        //lock all buses
+        for(BusSolution bus : sorted)
+            bus.busLock.lock();
+
+        try{
+                //get all tickets
+            for(BusSolution bus : buses)
+                ret.addAll(bus.contents);
+        }finally {
+            //unlock all buses
+            for(BusSolution bus : buses)
+                bus.busLock.unlock();
+       }
+
         return ret;
     }
 }
